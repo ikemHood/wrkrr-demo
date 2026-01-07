@@ -1,4 +1,4 @@
-import { openai } from "@ai-sdk/openai";
+import { openai } from "~/lib/ai";
 import { generateObject } from "ai";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
         const { jobDescription } = requestSchema.parse(body);
 
         const { object } = await generateObject({
-            model: openai("gpt-4o-mini"),
+            model: openai("openai/gpt-5.2"),
             schema: questionsSchema,
             prompt: `You are an experienced technical interviewer. Based on the following job description, generate 3-5 interview questions that would help assess a candidate's fit for this role.
 

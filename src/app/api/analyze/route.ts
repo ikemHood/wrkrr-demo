@@ -1,4 +1,4 @@
-import { openai } from "@ai-sdk/openai";
+import { openai } from "~/lib/ai";
 import { generateObject } from "ai";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -55,7 +55,7 @@ Answer: ${a.answer}`
             .join("\n\n");
 
         const { object } = await generateObject({
-            model: openai("gpt-4o-mini"),
+            model: openai("openai/gpt-5.2"),
             schema: analysisSchema,
             prompt: `You are an expert interview coach analyzing a mock interview performance. Provide constructive, encouraging feedback that helps the candidate improve.
 
