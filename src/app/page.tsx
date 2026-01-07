@@ -1,86 +1,58 @@
-import { headers } from "next/headers";
-import Link from "next/link";
-import { redirect } from "next/navigation";
+"use client";
 
-import { auth } from "~/server/better-auth";
-import { getSession } from "~/server/better-auth/server";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { saveJobDescription } from "~/lib/storage";
 
-export default async function Home() {
-  const session = await getSession();
+export default function Home() {
+  const router = useRouter();
+  const [jobDescription, setJobDescription] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleContinue = () => {
+    if (!jobDescription.trim()) return;
+
+    setIsLoading(true);
+    saveJobDescription(jobDescription.trim());
+    router.push("/prepare");
+  };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-      <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-        <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
-          Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
-        </h1>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-          <Link
-            className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-            href="https://create.t3.gg/en/usage/first-steps"
-            target="_blank"
-          >
-            <h3 className="text-2xl font-bold">First Steps →</h3>
-            <div className="text-lg">
-              Just the basics - Everything you need to know to set up your
-              database and authentication.
-            </div>
-          </Link>
-          <Link
-            className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-            href="https://create.t3.gg/en/introduction"
-            target="_blank"
-          >
-            <h3 className="text-2xl font-bold">Documentation →</h3>
-            <div className="text-lg">
-              Learn more about Create T3 App, the libraries it uses, and how to
-              deploy it.
-            </div>
-          </Link>
+    <main className="flex min-h-screen flex-col items-center justify-center px-4 py-16">
+      <div className="glass-card w-full max-w-2xl p-8 md:p-10 animate-fade-in">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-semibold mb-2">wrkrr</h1>
+          <p className="text-[--color-text-muted]">
+            practice interviews with ai
+          </p>
         </div>
-        <div className="flex flex-col items-center gap-2">
-          <div className="flex flex-col items-center justify-center gap-4">
-            <p className="text-center text-2xl text-white">
-              {session && <span>Logged in as {session.user?.name}</span>}
-            </p>
-            {!session ? (
-              <form>
-                <button
-                  className="rounded-full bg-white/10 px-10 py-3 font-semibold no-underline transition hover:bg-white/20"
-                  formAction={async () => {
-                    "use server";
-                    const res = await auth.api.signInSocial({
-                      body: {
-                        provider: "github",
-                        callbackURL: "/",
-                      },
-                    });
-                    if (!res.url) {
-                      throw new Error("No URL returned from signInSocial");
-                    }
-                    redirect(res.url);
-                  }}
-                >
-                  Sign in with Github
-                </button>
-              </form>
-            ) : (
-              <form>
-                <button
-                  className="rounded-full bg-white/10 px-10 py-3 font-semibold no-underline transition hover:bg-white/20"
-                  formAction={async () => {
-                    "use server";
-                    await auth.api.signOut({
-                      headers: await headers(),
-                    });
-                    redirect("/");
-                  }}
-                >
-                  Sign out
-                </button>
-              </form>
-            )}
+
+        {/* Job Description Input */}
+        <div className="space-y-5">
+          <div>
+            <label
+              htmlFor="job-description"
+              className="block text-sm text-[--color-text-muted] mb-2"
+            >
+              paste the job description
+            </label>
+            <textarea
+              id="job-description"
+              className="textarea-premium w-full h-56"
+              placeholder="paste the full job description here..."
+              value={jobDescription}
+              onChange={(e) => setJobDescription(e.target.value)}
+            />
           </div>
+
+          <button
+            className="btn-primary w-full"
+            onClick={handleContinue}
+            disabled={!jobDescription.trim() || isLoading}
+          >
+            {isLoading ? "loading..." : "continue"}
+          </button>
         </div>
       </div>
     </main>

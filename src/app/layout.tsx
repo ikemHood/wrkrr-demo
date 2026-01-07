@@ -1,24 +1,24 @@
 import "~/styles/globals.css";
 
 import { type Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Space_Grotesk } from "next/font/google";
 
 export const metadata: Metadata = {
-  title: "Wrkrr - AI Interview Simulator",
-  description: "Practice your interview skills with AI-powered mock interviews tailored to any job description",
+  title: "wrkrr - Interview Practice",
+  description: "Practice your interview skills with AI mock interviews",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
-const geist = Geist({
+const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
-  variable: "--font-geist-sans",
+  variable: "--font-space",
 });
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${geist.variable}`}>
+    <html lang="en" className={`${spaceGrotesk.variable}`}>
       <body>{children}</body>
     </html>
   );
