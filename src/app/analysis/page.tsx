@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { getInterviewData, clearInterviewData } from "~/lib/storage";
 
@@ -24,14 +24,19 @@ export default function AnalysisPage() {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const hasLoadedRef = useRef(false);
 
   useEffect(() => {
+    if (hasLoadedRef.current) return;
+
     const loadAnalysis = async () => {
       const data = getInterviewData();
       if (!data?.jobDescription || !data.answers?.length) {
         router.push("/");
         return;
       }
+
+      hasLoadedRef.current = true;
 
       try {
         const response = await fetch("/api/analyze", {
@@ -57,6 +62,7 @@ export default function AnalysisPage() {
 
     loadAnalysis();
   }, [router]);
+
 
   const handleTryAgain = () => {
     clearInterviewData();

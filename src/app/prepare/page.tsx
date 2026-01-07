@@ -39,7 +39,7 @@ export default function PreparePage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          text: "Hello! I will be your interviewer today.",
+          text: "Hello!, I am Fred, I will be your interviewer today. click on start interview let's get started",
         }),
       });
 
