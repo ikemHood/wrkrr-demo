@@ -27,9 +27,7 @@ interface SpeechRecognition extends EventTarget {
     abort(): void;
 }
 
-interface SpeechRecognitionConstructor {
-    new(): SpeechRecognition;
-}
+type SpeechRecognitionConstructor = new () => SpeechRecognition;
 
 declare global {
     interface Window {
@@ -79,7 +77,7 @@ export function speak(text: string): Promise<void> {
         }
 
         utterance.onend = () => resolve();
-        utterance.onerror = (e) => reject(e);
+        utterance.onerror = (e) => reject(new Error(e.error));
 
         window.speechSynthesis.speak(utterance);
     });
@@ -95,7 +93,7 @@ export function stopSpeaking(): void {
 // Get speech recognition constructor
 function getSpeechRecognition(): SpeechRecognitionConstructor | null {
     if (typeof window === "undefined") return null;
-    return window.SpeechRecognition || window.webkitSpeechRecognition || null;
+    return window.SpeechRecognition ?? window.webkitSpeechRecognition ?? null;
 }
 
 // Create a speech recognition instance
@@ -130,7 +128,7 @@ export function startListening(
 
         for (let i = event.resultIndex; i < event.results.length; i++) {
             const result = event.results[i];
-            if (result && result[0]) {
+            if (result?.[0]) {
                 const transcript = result[0].transcript;
                 if (result.isFinal) {
                     finalTranscript += transcript + " ";

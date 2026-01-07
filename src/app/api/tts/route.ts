@@ -2,9 +2,13 @@ import { openai } from "~/lib/ai";
 import { NextResponse } from "next/server";
 
 
+interface TTSRequest {
+    text?: unknown;
+}
+
 export async function POST(request: Request) {
     try {
-        const { text } = await request.json();
+        const { text } = (await request.json()) as TTSRequest;
 
         if (!text || typeof text !== "string") {
             return NextResponse.json(

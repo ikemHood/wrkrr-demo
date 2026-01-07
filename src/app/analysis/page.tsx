@@ -50,7 +50,7 @@ export default function AnalysisPage() {
 
         if (!response.ok) throw new Error("Failed to analyze interview");
 
-        const result = await response.json();
+        const result = (await response.json()) as AnalysisResult;
         setAnalysis(result);
       } catch (err) {
         setError("Failed to analyze your interview.");
@@ -60,7 +60,7 @@ export default function AnalysisPage() {
       }
     };
 
-    loadAnalysis();
+    void loadAnalysis();
   }, [router]);
 
 

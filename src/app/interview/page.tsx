@@ -6,8 +6,20 @@ import {
   getInterviewData,
   saveQuestions,
   saveAnswer,
-  type InterviewQuestion,
 } from "~/lib/storage";
+
+interface InterviewResponse {
+  questions: string[];
+}
+
+interface EvaluationResponse {
+  needsFollowUp: boolean;
+  followUpQuestion?: string;
+}
+
+interface TranscriptionResponse {
+  text?: string;
+}
 
 type InterviewState =
   | "loading"
@@ -75,13 +87,13 @@ export default function InterviewPage() {
 
         if (!response.ok) throw new Error("Failed to generate questions");
 
-        const result = await response.json();
+        const result = (await response.json()) as InterviewResponse;
         setQuestions(result.questions);
         saveQuestions(result.questions);
 
         // Set the first question
         if (result.questions.length > 0) {
-          setCurrentQuestion(result.questions[0]);
+          setCurrentQuestion(result.questions[0] ?? "");
           setState("asking");
         }
       } catch (err) {
@@ -90,7 +102,7 @@ export default function InterviewPage() {
       }
     };
 
-    loadInterview();
+    void loadInterview();
   }, [router]);
 
   // Speak the current question using OpenAI TTS
@@ -147,7 +159,7 @@ export default function InterviewPage() {
           clearInterval(Number(audio.dataset.typeInterval));
         }
         setState("listening");
-        startRecording();
+        void startRecording();
       };
 
       audio.onerror = () => {
@@ -164,7 +176,7 @@ export default function InterviewPage() {
   // Start when state changes to "asking"
   useEffect(() => {
     if (state === "asking" && currentQuestion) {
-      speakQuestion(currentQuestion);
+      void speakQuestion(currentQuestion);
     }
   }, [state, currentQuestion, speakQuestion]);
 
@@ -223,10 +235,10 @@ export default function InterviewPage() {
 
           if (!response.ok) throw new Error("Transcription failed");
 
-          const result = await response.json();
-          resolve(result.text || "");
+          const result = (await response.json()) as TranscriptionResponse;
+          resolve(result.text ?? "");
         } catch (err) {
-          reject(err);
+          reject(err instanceof Error ? err : new Error(String(err)));
         }
       };
 
@@ -235,7 +247,7 @@ export default function InterviewPage() {
   };
 
   // Evaluate answer and check if follow-up is needed
-  const evaluateAnswer = async (
+  const evaluateAnswer = useCallback(async (
     question: string,
     answer: string
   ): Promise<{ needsFollowUp: boolean; followUpQuestion?: string }> => {
@@ -253,7 +265,7 @@ export default function InterviewPage() {
 
       if (!response.ok) throw new Error("Evaluation failed");
 
-      const result = await response.json();
+      const result = (await response.json()) as EvaluationResponse;
       return {
         needsFollowUp: result.needsFollowUp,
         followUpQuestion: result.followUpQuestion,
@@ -262,7 +274,7 @@ export default function InterviewPage() {
       console.error("Evaluation error:", err);
       return { needsFollowUp: false };
     }
-  };
+  }, [jobDescription, questionHistory]);
 
   const handleDoneAnswering = useCallback(async () => {
     setState("processing");
@@ -304,7 +316,7 @@ export default function InterviewPage() {
       console.error("Processing Error:", err);
       setError("Failed to process your answer. Please try again.");
     }
-  }, [currentQuestion, currentQuestionIndex, questions, router, jobDescription, questionHistory, followUpCount]);
+  }, [currentQuestion, currentQuestionIndex, questions, router, followUpCount, evaluateAnswer]);
 
   const getOrbClass = () => {
     switch (state) {
@@ -407,7 +419,7 @@ export default function InterviewPage() {
             className="btn-primary animate-fade-in"
             onClick={handleDoneAnswering}
           >
-            I'm Done Answering
+            I&apos;m Done Answering
           </button>
         )}
 
