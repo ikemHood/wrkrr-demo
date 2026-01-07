@@ -1,7 +1,6 @@
-import OpenAI from "openai";
+import { openai } from "~/lib/ai";
 import { NextResponse } from "next/server";
 
-const openai = new OpenAI();
 
 export async function POST(request: Request) {
     try {
